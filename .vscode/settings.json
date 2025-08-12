@@ -1,0 +1,11 @@
+{
+  "liveServer.settings.port": 5500,
+  "liveServer.settings.root": "/",
+  "liveServer.settings.noBrowser": false,
+  "liveServer.settings.wait": 200,
+  "liveServer.settings.ignoreFiles": [
+    ".vscode/**",
+    "_llm-docs/**"
+  ]
+}
+
