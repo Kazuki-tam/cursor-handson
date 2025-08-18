@@ -137,7 +137,7 @@
 
   async function runOCR() {
     if (!originalImageBitmap) return;
-    const lang = langSelect.value || 'jpn';
+    const lang = langSelect.value || 'ja';
 
     setRunning(true);
     setProgress(1, '初期化中');
@@ -152,27 +152,53 @@
       }
       setProgress(5, '画像をエンコード中');
       const dataUrl = previewCanvas.toDataURL('image/png');
-      const model = 'gpt-4o-mini';
-      const prompt = lang === 'jpn'
-        ? '画像は領収書です。読み取れたテキストをできるだけ正確にプレーンテキストで返してください。'
-        : 'This is a receipt image. Return plain text of the content accurately.';
+      const model = 'gpt-5-nano-2025-08-07';
+      const prompt = lang === 'ja'
+        ? '画像は領収書です。読み取れたテキストをできるだけ正確に抽出してください。もし元の文字が他の言語の場合は、日本語に翻訳してください。'
+        : lang === 'en'
+          ? 'This is a receipt image. Extract the text content accurately. If the original text is in other languages, translate it to English.'
+          : '이 이미지는 영수증입니다. 텍스트 내용을 정확하게 추출해주세요. 원본 텍스트가 다른 언어인 경우 한국어로 번역해주세요.';
+
+      const responseSchema = {
+        type: "object",
+        properties: {
+          extracted_text: {
+            type: "string",
+            description: lang === 'ja'
+              ? "領収書から抽出されたテキスト内容（日本語）"
+              : lang === 'en'
+                ? "The extracted text content from the receipt (in English)"
+                : "영수증에서 추출된 텍스트 내용 (한국어)"
+          }
+        },
+        required: ["extracted_text"],
+        additionalProperties: false
+      };
 
       const body = {
         model,
-        input: [
+        messages: [
           {
             role: 'user',
             content: [
-              { type: 'input_text', text: prompt },
-              { type: 'input_image', image_url: dataUrl }
+              { type: 'text', text: prompt },
+              { type: 'image_url', image_url: { url: dataUrl } }
             ]
           }
-        ]
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "receipt_ocr_result",
+            strict: true,
+            schema: responseSchema
+          }
+        }
       };
 
       setProgress(10, 'OpenAIへ送信中');
       currentRequestController = new AbortController();
-      const res = await fetch('https://api.openai.com/v1/responses', {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -186,8 +212,18 @@
         throw new Error(`OpenAI API error: ${res.status} ${errText}`);
       }
       const json = await res.json();
-      const text = json?.output?.[0]?.content?.[0]?.text || json?.choices?.[0]?.message?.content || '';
-      outputTextarea.value = text;
+      const messageContent = json?.choices?.[0]?.message?.content || '';
+      let extractedText = '';
+
+      try {
+        const parsedContent = JSON.parse(messageContent);
+        extractedText = parsedContent?.extracted_text || '';
+      } catch (e) {
+        // JSONパースに失敗した場合は、そのままのテキストを使用
+        extractedText = messageContent;
+      }
+
+      outputTextarea.value = extractedText;
       setProgress(100, '完了');
       enableOutputButtonsIfAny();
     } catch (err) {
@@ -278,7 +314,7 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    const lang = langSelect.value || 'jpn';
+    const lang = langSelect.value || 'ja';
     a.download = `ocr-result-${lang}.txt`;
     document.body.appendChild(a);
     a.click();
