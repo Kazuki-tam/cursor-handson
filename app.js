@@ -152,7 +152,7 @@
       }
       setProgress(5, '画像をエンコード中');
       const dataUrl = previewCanvas.toDataURL('image/png');
-      const model = 'gpt-5-nano-2025-08-07';
+      const model = 'gpt-4o-mini';
       const prompt = lang === 'ja'
         ? '画像は領収書です。読み取れたテキストをできるだけ正確に抽出してください。もし元の文字が他の言語の場合は、日本語に翻訳してください。'
         : lang === 'en'

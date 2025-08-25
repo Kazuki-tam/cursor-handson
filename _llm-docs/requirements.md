@@ -6,7 +6,7 @@
 
 ## 1. 目的・背景
 - **目的**: 領収書画像からテキストを抽出し、コピー・ダウンロード・軽微な整形ができる、純ブラウザ（HTML/CSS/JavaScript）構成のWebアプリを提供する。
-- **背景**: OpenAI Vision API（gpt-5-nano-2025-08-07モデル）を活用し、高精度な文字認識と多言語対応（日本語・英語・韓国語）、および自動翻訳機能を提供する［参考: [OpenAI Vision API Documentation](https://platform.openai.com/docs/guides/vision)］。
+- **背景**: OpenAI Vision API（gpt-4o-miniモデル）を活用し、高精度な文字認識と多言語対応（日本語・英語・韓国語）、および自動翻訳機能を提供する［参考: [OpenAI Vision API Documentation](https://platform.openai.com/docs/guides/vision)］。
 
 ## 2. スコープ
 - **インスコープ**
@@ -33,7 +33,7 @@
 - **技術スタック**: HTML, JavaScript（ES6 目安）, CSSフレームワークは Tailwind CSS（CDN）
 - **ライブラリ取得**: CDN（Tailwind CDN）のみ
 - **ビルド/実行環境**: Node.js 不要。静的ホスティング/ローカル`http(s)://`で動作可能。
-- **外部API**: OpenAI Vision API（gpt-5-nano-2025-08-07）。ユーザー自身のAPI Keyが必要。
+- **外部API**: OpenAI Vision API（gpt-4o-mini）。ユーザー自身のAPI Keyが必要。
 - **ブラウザ互換**: 最新版の Chromium/Firefox/Safari を優先。Fetch API、async/await対応必須。
 - **パフォーマンス**: 画像は自動的に最大2000px以下に縮小。OpenAI API通信時間は数秒〜十数秒。
 - **セキュリティ**: API KeyはブラウザメモリおよびlocalStorageにのみ保持。HTTPS必須。
@@ -101,7 +101,7 @@ const response = await fetch('https://api.openai.com/v1/chat/completions', {
     'Authorization': `Bearer ${apiKey}`
   },
   body: JSON.stringify({
-    model: 'gpt-5-nano-2025-08-07',
+    model: 'gpt-4o-mini',
     messages: [{
       role: 'user',
       content: [
